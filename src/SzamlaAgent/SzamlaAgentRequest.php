@@ -462,9 +462,12 @@ class SzamlaAgentRequest {
 
             $ch = curl_init($agent->getApiUrl());
 
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_CAINFO, $agent->getCertificationFile());
+            if ($agent->hasCertification()) {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+                curl_setopt($ch, CURLOPT_CAINFO, $agent->getCertificationFilePath());
+            }
+
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HEADER, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -562,13 +565,13 @@ class SzamlaAgentRequest {
                 throw new SzamlaAgentException($error);
             } else {
                 $keys = implode(",", array_keys($headers));
-                if ($response['headers']['Content-Type'] == 'application/pdf' || (!preg_match('/(szlahu_)/', $keys, $matches))) {
+                if ($response['headers']['content-type'] == 'application/pdf' || (!preg_match('/(szlahu_)/', $keys, $matches))) {
                     $msg = $response['headers'];
                 } else {
                     $msg = $response;
                 }
 
-                $response['headers']['Schema-Type'] = $this->getXmlSchemaType();
+                $response['headers']['schema-type'] = $this->getXmlSchemaType();
                 $agent->writeLog("CURL adatok elküldése sikeresen befejeződött: " . print_r($msg, TRUE), Log::LOG_LEVEL_DEBUG);
             }
             curl_close($ch);
@@ -600,7 +603,7 @@ class SzamlaAgentRequest {
                     $pos = strpos($content, ":");
                     if ($pos !== false) {
                         list ($key, $value) = explode(': ', $content);
-                        $headers[$key] = $value;
+                        $headers[strtolower($key)] = $value;
                     }
                 }
             }

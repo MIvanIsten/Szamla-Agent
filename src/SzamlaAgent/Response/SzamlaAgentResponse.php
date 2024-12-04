@@ -109,6 +109,13 @@ class SzamlaAgentResponse {
      */
     private $xmlSchemaType;
 
+    /**
+     * Mentett PDF fálj neve
+     *
+     * @var string
+     */
+    private $previewFileName;
+
 
     /**
      * Számla Agent válasz létrehozása
@@ -119,7 +126,7 @@ class SzamlaAgentResponse {
     public function __construct(SzamlaAgent $agent, array $response) {
         $this->setAgent($agent);
         $this->setResponse($response);
-        $this->setXmlSchemaType($response['headers']['Schema-Type']);
+        $this->setXmlSchemaType($response['headers']['schema-type']);
     }
 
     /**
@@ -138,7 +145,7 @@ class SzamlaAgentResponse {
         }
 
         if (isset($response['headers']) && !empty($response['headers'])) {
-            $headers = $response['headers'];
+            $headers = array_change_key_case($response['headers'], CASE_LOWER);
 
             if (isset($headers['szlahu_down']) && SzamlaAgentUtil::isNotBlank($headers['szlahu_down'])) {
                 throw new SzamlaAgentException(SzamlaAgentException::SYSTEM_DOWN, 500);
@@ -273,25 +280,29 @@ class SzamlaAgentResponse {
     }
 
     /**
-     * Visszaadja a PDF fájl nevét
+     * Visszaadja a PDF fájl nevét, amennyiben a PDF file-ok mentése be van kapcsolva
      *
      * @param bool $withPath
      *
-     * @return bool|string
+     * @return string
      */
     public function getPdfFileName($withPath = true) {
         $header = $this->getAgent()->getRequestEntityHeader();
 
         if ($header instanceof InvoiceHeader && $header->isPreviewPdf()) {
-            $entity = $this->getAgent()->getRequestEntity();
 
-            $name = '';
-            if ($entity != null && $entity instanceof Invoice) {
-                try {
-                    $name .= (new \ReflectionClass($entity))->getShortName() . '-';
-                } catch (\ReflectionException $e) {}
+            if (SzamlaAgentUtil::isBlank($this->getPreviewFileName())) {
+                $entity = $this->getAgent()->getRequestEntity();
+                $name = '';
+                if ($entity != null && $entity instanceof Invoice) {
+                    try {
+                        $name .= (new \ReflectionClass($entity))->getShortName() . '-';
+                    } catch (\ReflectionException $e) {}
+                }
+                $this->setPreviewFileName(strtolower($name) . 'preview-' . SzamlaAgentUtil::getDateTimeWithMilliseconds());
             }
-            $documentNumber = strtolower($name) . 'preview-' . SzamlaAgentUtil::getDateTimeWithMilliseconds();
+
+            $documentNumber = $this->getPreviewFileName();
         } else {
             $documentNumber = $this->getDocumentNumber();
         }
@@ -301,7 +312,6 @@ class SzamlaAgentResponse {
         } else {
             return $documentNumber . '.pdf';
         }
-
     }
 
     /**
@@ -800,6 +810,14 @@ class SzamlaAgentResponse {
      */
     public function getCookieSessionId() {
         return $this->agent->getCookieSessionId();
+    }
+
+    public function getPreviewFileName() {
+        return $this->previewFileName;
+    }
+
+    public function setPreviewFileName(string $previewFileName) {
+        $this->previewFileName = $previewFileName;
     }
 
 }
