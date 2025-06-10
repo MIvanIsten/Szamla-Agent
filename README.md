@@ -1,6 +1,6 @@
 Made this package because the developers of **[Számla Agent API](https://docs.szamlazz.hu/#introduction)** failed to use proper PSR-4 compatible folder naming. (And maintain a repo)
 
-**[Számla Agent API](https://docs.szamlazz.hu/#introduction)** version used: **2.10.20** \
+**[Számla Agent API](https://docs.szamlazz.hu/#introduction)** version used: **2.10.21** \
 Original source files downloaded from [https://docs.szamlazz.hu/php](https://docs.szamlazz.hu/php).\
 No changes made to code, only letter case fixed in folder names.
 
