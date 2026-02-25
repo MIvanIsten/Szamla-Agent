@@ -1,3 +1,10 @@
+> [!CAUTION]
+> This package is **abandoned**.
+>
+> This package is no longer maintained.
+>
+> Finally, there is an official package, please use [`kboss/szamlaagent_v2`](https://packagist.org/packages/kboss/szamlaagent_v2) instead. 
+
 Made this package because the developers of **[Számla Agent API](https://docs.szamlazz.hu/#introduction)** failed to use proper PSR-4 compatible folder naming. (And maintain a repo)
 
 **[Számla Agent API](https://docs.szamlazz.hu/#introduction)** version used: **2.10.21** \
